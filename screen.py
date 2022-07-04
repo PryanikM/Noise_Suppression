@@ -1,6 +1,9 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 
+from PyQt5.QtCore import QRegExp
+from PyQt5.QtGui import QRegExpValidator
+
 from MplForWidget import PlotCanvas
 from NoiseSuppression import NoiseSuppression
 
@@ -10,10 +13,26 @@ class Ui_Form(QMainWindow):
     def __init__(self):
         super().__init__()
         self.k = NoiseSuppression()
-        self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
+        self.k.set_audio('music.wav')
+
+    def __check_range(self):
+        str_input = str(self.textEdit.text())
+        try:
+            rng = list(map(int, str_input.replace(" ", '').split('-')))
+        except Exception:
+            return -1
+        if (len(rng) == 2) and (rng[0] < rng[1]) and (0 <= rng[0]) and (rng[1] <= self.k.get_audio().shape[0]):
+            return rng
+        else:
+            return -1
 
     def delete_noise_button_click(self):
-        xf, yf = self.k.delete_noise()
+        answer = self.__check_range()
+        if answer != -1:
+            xf, yf = self.k.delete_noise()
+        else:
+            print('Ошибка')
+            xf, yf = self.k.delete_noise()
         self.delete_noise_widget.plot(xf, yf)
 
     def setupUi(self, Form):
@@ -47,20 +66,23 @@ class Ui_Form(QMainWindow):
 
         self.verticalLayout.addWidget(self.plainTextEdit)
 
-        self.textEdit = QtWidgets.QTextEdit(self.verticalLayoutWidget)
+        self.textEdit = QtWidgets.QLineEdit(self.verticalLayoutWidget)
         self.textEdit.setObjectName("textEdit")
+        self.textEdit.setValidator(QRegExpValidator(QRegExp('^[0-9\-]+[0-9]')))
 
         self.verticalLayout.addWidget(self.textEdit)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.delete_noise_button.setText(_translate("Form", "Убрать шум"))
-        self.plainTextEdit.setText(_translate("Form", "Введите диапозон частоты, который нужно очистить. Формат: число - число"))
+        self.plainTextEdit.setText(
+            _translate("Form", f"Введите диапозон частоты, который нужно очистить. Формат: {0} - "
+                               f"{self.k.get_audio().shape[0]}"))
+
 
 if __name__ == "__main__":
     import sys
