@@ -21,14 +21,18 @@ class Ui_Form(QMainWindow):
             rng = list(map(int, str_input.replace(" ", '').split('-')))
         except Exception:
             return -1
-        if (rng[0] < rng[1]) and 0 <= rng[0] and rng[1] <= self.k.get_audio().shape[0]:
+        if (len(rng) == 2) and (rng[0] < rng[1]) and (0 <= rng[0]) and (rng[1] <= self.k.get_audio().shape[0]):
             return rng
         else:
             return -1
 
     def delete_noise_button_click(self):
-        xf, yf = self.k.delete_noise()
-        print(self.__check_range())
+        answer = self.__check_range()
+        if answer != -1:
+            xf, yf = self.k.delete_noise()
+        else:
+            print('Ошибка')
+            xf, yf = self.k.delete_noise()
         self.delete_noise_widget.plot(xf, yf)
 
     def setupUi(self, Form):
