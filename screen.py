@@ -8,14 +8,22 @@ from MplForWidget import PlotCanvas
 from NoiseSuppression import NoiseSuppression
 
 import simpleaudio as sa
-
+import numpy as np
 
 class Ui_Form(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.k = NoiseSuppression()
-        self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
+        #self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
+
+        self.play_obj = None
+
+    def set_audio(self, path_to_file):
+        if not self.k.set_audio(path_to_file):
+            return -1
+        else:
+            return 1
 
     def __check_target_amplitude(self):
         str_input = str(self.textEdit_2.text())
@@ -60,13 +68,22 @@ class Ui_Form(QMainWindow):
             xf, yf = self.k.delete_noise()
         self.delete_noise_widget.plot(xf, yf)
 
+    def play_audio(self, audio, sample_rate):
+        if self.play_obj is not None:
+            if not self.play_obj.is_playing():
+                print(self.play_obj.is_playing())
+                self.play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
+        else:
+            self.play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
+
     def play_original_audio(self):
-        play_obj = sa.play_buffer(self.k.get_audio(), 1, 2, self.k.get_sample_rate())
-        # Wait for playback to finish before exiting
-        #play_obj.wait_done()
+        self.play_audio(self.k.get_audio(), self.k.get_sample_rate())
 
     def play_clear_audio(self):
-        play_obj = sa.play_buffer(self.k.get_clear_audio(), 1, 2, self.k.get_sample_rate())
+        audio = self.k.get_clear_audio()
+        if audio is not None:
+            self.play_audio(self.k.get_clear_audio(), self.k.get_sample_rate())
+        #self.play_obj = sa.play_buffer(self.k.get_clear_audio(), 1, 2, self.k.get_sample_rate())
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -135,6 +152,7 @@ class Ui_Form(QMainWindow):
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
+
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
@@ -150,10 +168,20 @@ class Ui_Form(QMainWindow):
 
 if __name__ == "__main__":
     import sys
-
+    print('HERE')
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
     ui = Ui_Form()
     ui.setupUi(Form)
     Form.show()
     sys.exit(app.exec_())
+
+# if __name__ == "__main__":
+#     import sys
+#     print('HERE')
+#     app = QtWidgets.QApplication(sys.argv)
+#     Form = QtWidgets.QWidget()
+#     ui = Ui_Form()
+#     ui.setupUi(Form)
+#     Form.show()
+#     sys.exit(app.exec_())
