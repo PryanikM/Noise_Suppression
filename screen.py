@@ -7,40 +7,73 @@ from PyQt5.QtGui import QRegExpValidator
 from MplForWidget import PlotCanvas
 from NoiseSuppression import NoiseSuppression
 
+import simpleaudio as sa
+
 
 class Ui_Form(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.k = NoiseSuppression()
-        self.k.set_audio('music.wav')
+        self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
+
+    def __check_target_amplitude(self):
+        str_input = str(self.textEdit_2.text())
+        if str_input == '':
+            return -1
+        else:
+            rng = [int(str_input)]
+            return rng
 
     def __check_range(self):
         str_input = str(self.textEdit.text())
-        try:
-            rng = list(map(int, str_input.replace(" ", '').split('-')))
-        except Exception:
+        print(str_input)
+        if str_input == '':
             return -1
-        if (len(rng) == 2) and (rng[0] < rng[1]) and (0 <= rng[0]) and (rng[1] <= self.k.get_audio().shape[0]):
-            return rng
         else:
-            return -1
+            if '-' in str_input:
+                try:
+                    rng = list(map(int, str_input.replace(" ", '').split('-')))
+                except Exception:
+                    return -1
+                if (len(rng) == 2) and (rng[0] < rng[1]) and (0 <= rng[0]) and (rng[1] <= self.k.get_audio().shape[0]):
+                    return rng
+                else:
+                    return -1
+            else:
+                rng = list(map(int, str_input.split(" ")))
+                if len(rng) == 1 and 0 <= rng[0] <= self.k.get_audio().shape[0]:
+                    return rng
+                else:
+                    return -1
 
     def delete_noise_button_click(self):
-        answer = self.__check_range()
-        if answer != -1:
-            xf, yf = self.k.delete_noise()
+        answer_range = self.__check_range()
+        answer_amplitude = self.__check_target_amplitude()
+        if answer_range != -1:
+            if answer_amplitude != -1:
+                xf, yf = self.k.delete_noise(answer_range, answer_amplitude)
+            else:
+                xf, yf = self.k.delete_noise(answer_range)
+
         else:
-            print('Ошибка')
             xf, yf = self.k.delete_noise()
         self.delete_noise_widget.plot(xf, yf)
+
+    def play_original_audio(self):
+        play_obj = sa.play_buffer(self.k.get_audio(), 1, 2, self.k.get_sample_rate())
+        # Wait for playback to finish before exiting
+        #play_obj.wait_done()
+
+    def play_clear_audio(self):
+        play_obj = sa.play_buffer(self.k.get_clear_audio(), 1, 2, self.k.get_sample_rate())
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1093, 713)
 
         self.delete_noise_button = QtWidgets.QPushButton(Form)
-        self.delete_noise_button.setGeometry(QtCore.QRect(40, 530, 181, 51))
+        self.delete_noise_button.setGeometry(QtCore.QRect(150, 580, 181, 51))
         self.delete_noise_button.setObjectName("delete_noise_button")
         self.delete_noise_button.clicked.connect(self.delete_noise_button_click)
 
@@ -72,6 +105,33 @@ class Ui_Form(QMainWindow):
 
         self.verticalLayout.addWidget(self.textEdit)
 
+        self.verticalLayoutWidget_2 = QtWidgets.QWidget(Form)
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(0, 220, 481, 41))
+        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayout_2.setContentsMargins(5, 0, 0, 0)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+
+        self.plainTextEdit_2 = QtWidgets.QLineEdit(self.verticalLayoutWidget_2)
+        self.plainTextEdit_2.setObjectName("plainTextEdit_2")
+
+        self.verticalLayout_2.addWidget(self.plainTextEdit_2)
+
+        self.textEdit_2 = QtWidgets.QLineEdit(self.verticalLayoutWidget_2)
+        self.textEdit_2.setObjectName("textEdit_2")
+        self.verticalLayout_2.addWidget(self.textEdit_2)
+        self.textEdit_2.setValidator(QRegExpValidator(QRegExp('^[0-9]+$')))
+
+        self.original_audio_button = QtWidgets.QPushButton(Form)
+        self.original_audio_button.setGeometry(QtCore.QRect(0, 470, 181, 51))
+        self.original_audio_button.setObjectName("original_audio_button")
+        self.original_audio_button.clicked.connect(self.play_original_audio)
+
+        self.modify_audio_button = QtWidgets.QPushButton(Form)
+        self.modify_audio_button.setGeometry(QtCore.QRect(300, 470, 181, 51))
+        self.modify_audio_button.setObjectName("modify_audio_button")
+        self.modify_audio_button.clicked.connect(self.play_clear_audio)
+
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -82,6 +142,10 @@ class Ui_Form(QMainWindow):
         self.plainTextEdit.setText(
             _translate("Form", f"Введите диапозон частоты, который нужно очистить. Формат: {0} - "
                                f"{self.k.get_audio().shape[0]}"))
+        self.plainTextEdit_2.setText(_translate("Form", "Введите с какой амплитуды нужно очистить\n"""))
+
+        self.original_audio_button.setText(_translate("Form", "Послушать оригинал"))
+        self.modify_audio_button.setText(_translate("Form", "Послушать очищенную версию"))
 
 
 if __name__ == "__main__":
