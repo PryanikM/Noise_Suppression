@@ -123,13 +123,13 @@ class Ui_Form(QMainWindow):
         self.verticalLayout.addWidget(self.textEdit)
 
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(Form)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(0, 220, 481, 41))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(0, 220, 481, 45))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setContentsMargins(5, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
 
-        self.plainTextEdit_2 = QtWidgets.QLineEdit(self.verticalLayoutWidget_2)
+        self.plainTextEdit_2 = QtWidgets.QLabel(self.verticalLayoutWidget_2)
         self.plainTextEdit_2.setObjectName("plainTextEdit_2")
 
         self.verticalLayout_2.addWidget(self.plainTextEdit_2)
