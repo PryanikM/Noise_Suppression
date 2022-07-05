@@ -1,26 +1,27 @@
+import simpleaudio as sa
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
-
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtWidgets import QFileDialog, QMainWindow
+from scipy.io.wavfile import write
 
 from MplForWidget import PlotCanvas
 from NoiseSuppression import NoiseSuppression
 
-import simpleaudio as sa
-import numpy as np
-from scipy.io.wavfile import write
-
-from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
 class Ui_Form(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, prevWindow):
         super().__init__()
+        self.preWindow = prevWindow
         self.k = NoiseSuppression()
-        #self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
+        # self.k.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
 
         self.play_obj = None
+
+    def back(self):
+        self.k = NoiseSuppression()
+        self.preWindow.showWindow()
 
     def set_audio(self, path_to_file):
         if not self.k.set_audio(path_to_file):
@@ -89,11 +90,15 @@ class Ui_Form(QMainWindow):
         audio = self.k.get_clear_audio()
         if audio is not None:
             self.play_audio(self.k.get_clear_audio(), self.k.get_sample_rate())
-        #self.play_obj = sa.play_buffer(self.k.get_clear_audio(), 1, 2, self.k.get_sample_rate())
+        # self.play_obj = sa.play_buffer(self.k.get_clear_audio(), 1, 2, self.k.get_sample_rate())
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1093, 713)
+
+        self.back_button = QtWidgets.QPushButton(Form)
+        self.back_button.setGeometry(QtCore.QRect(0, 0, 181, 21))
+        self.back_button.clicked.connect(self.back)
 
         self.delete_noise_button = QtWidgets.QPushButton(Form)
         self.delete_noise_button.setGeometry(QtCore.QRect(150, 580, 181, 51))
@@ -113,6 +118,7 @@ class Ui_Form(QMainWindow):
         self.verticalLayoutWidget = QtWidgets.QWidget(Form)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 40, 481, 41))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+
         self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setContentsMargins(5, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -131,6 +137,7 @@ class Ui_Form(QMainWindow):
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(Form)
         self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(0, 220, 481, 45))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
+
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setContentsMargins(5, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -166,10 +173,11 @@ class Ui_Form(QMainWindow):
         sig = self.k.get_clear_audio()
         if sig is not None:
             filename, ok = QFileDialog.getSaveFileName(self,
-                                 "Сохранить файл",
-                                 ".",
-                                 "wav file(*.wav);; All Files(*.*)")
-            write(filename, self.k.get_sample_rate(), sig)
+                                                       "Сохранить файл",
+                                                       ".",
+                                                       "wav file(*.wav);; All Files(*.*)")
+            if filename != '':
+                write(filename, self.k.get_sample_rate(), sig)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -183,10 +191,12 @@ class Ui_Form(QMainWindow):
         self.original_audio_button.setText(_translate("Form", "Послушать оригинал"))
         self.modify_audio_button.setText(_translate("Form", "Послушать очищенную версию"))
         self.saveFileNameButton.setText(_translate("Form", "Сохранить"))
+        self.back_button.setText(_translate("Form", "Назад"))
 
 
 if __name__ == "__main__":
     import sys
+
     print('HERE')
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
@@ -194,13 +204,3 @@ if __name__ == "__main__":
     ui.setupUi(Form)
     Form.show()
     sys.exit(app.exec_())
-
-# if __name__ == "__main__":
-#     import sys
-#     print('HERE')
-#     app = QtWidgets.QApplication(sys.argv)
-#     Form = QtWidgets.QWidget()
-#     ui = Ui_Form()
-#     ui.setupUi(Form)
-#     Form.show()
-#     sys.exit(app.exec_())

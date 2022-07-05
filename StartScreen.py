@@ -1,23 +1,20 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
 
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
-from PyQt5.QtGui import QFont
-
 from screen import Ui_Form
-#
-import sys
-import os
+
 
 class Form(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.nextScreen = Ui_Form()
+        self.nextScreen = Ui_Form(self)
 
         self.plainTextEdit = QtWidgets.QPlainTextEdit()
         self.plainTextEdit.setFont(QFont('Arial', 11))
-
 
         self.getFileNameButton = QtWidgets.QPushButton("Открыть файл")
         self.getFileNameButton.clicked.connect(self.get_file_name)
@@ -27,14 +24,10 @@ class Form(QMainWindow):
 
         self.file_name = ''
 
-
-
-
         layoutV = QtWidgets.QVBoxLayout()
         layoutV.addWidget(self.getFileNameButton)
 
         layoutV.addWidget(self.startWorkButton)
-
 
         layoutH = QtWidgets.QHBoxLayout()
         layoutH.addLayout(layoutV)
@@ -47,7 +40,6 @@ class Form(QMainWindow):
         self.resize(740, 480)
         self.setWindowTitle("PyQt5-QFileDialog")
 
-
     def get_file_name(self):
         filename, filetype = QFileDialog.getOpenFileName(self,
                                                          "Выбрать файл",
@@ -56,7 +48,6 @@ class Form(QMainWindow):
                                                          All Files(*)")
         self.plainTextEdit.appendHtml("<br><b>{}</b> <br>"
                                       "".format(filename, filetype))
-
 
         self.file_name = filename
 
@@ -69,10 +60,13 @@ class Form(QMainWindow):
                 global Form
                 Form = QtWidgets.QWidget()
                 self.nextScreen.setupUi(Form)
-                ex.close()
+                ex.hide()
                 Form.show()
             else:
                 pass
+    def showWindow(self):
+        Form.close()
+        ex.show()
 
 
 if __name__ == '__main__':

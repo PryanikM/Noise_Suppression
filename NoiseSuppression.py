@@ -95,14 +95,3 @@ class NoiseSuppression:
     def get_sample_rate(self):
         return self.__sample_rate
 
-
-import matplotlib.pyplot as plt
-
-# n = NoiseSuppression()
-# n.set_audio('C:/Project/USATU_Lab/Практика/music.wav')
-# xf, yf = n.get_frequency_response()
-# plt.plot(xf, yf)
-# plt.show()
-# xf, yf = n.delete_noise()
-# plt.plot(xf, yf)
-# plt.show()
