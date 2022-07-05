@@ -51,23 +51,28 @@ class NoiseSuppression:
     def delete_noise(self, target_idx_range=None, target_amplitude=None):
         # self.__new_yf = copy.deepcopy(self.__yf)
         if target_amplitude is None:
-            target_amplitude = max(self.__yf) + 1
+            meaning_target_amplitude = max(self.__yf) + 1
+        else:
+            meaning_target_amplitude = target_amplitude
 
-        if target_idx_range is None:
+        if target_idx_range is None and target_amplitude is None:
             target_idx = int(self.__points_per_freq * 4000)
 
-            self.__new_yf = np.array([self.__yf[i] if (self.__yf[i] >= target_amplitude and target_idx <= i) or
+            self.__new_yf = np.array([self.__yf[i] if (self.__yf[i] >= meaning_target_amplitude and target_idx <= i) or
                                                       (i <= target_idx) else 0 for i in range(len(self.__yf))])
+        elif target_idx_range is None and target_amplitude is not None:
+            self.__new_yf = np.array([self.__yf[i] if self.__yf[i] >= meaning_target_amplitude else 0 for i in range(len(self.__yf))])
+
         elif len(target_idx_range) == 1:
             target_idx = int(target_idx_range[0] * self.__points_per_freq)
-            self.__new_yf = np.array([self.__yf[i] if (self.__yf[i] >= target_amplitude and target_idx <= i) or
+            self.__new_yf = np.array([self.__yf[i] if (self.__yf[i] >= meaning_target_amplitude and target_idx <= i) or
                                                       (i <= target_idx) else 0 for i in range(len(self.__yf))])
         else:
             target_idx_start = int(target_idx_range[0] * self.__points_per_freq)
             target_idx_end = int(target_idx_range[1] * self.__points_per_freq)
 
             self.__new_yf = np.array(
-                [self.__yf[i] if (self.__yf[i] >= target_amplitude and target_idx_start <= i <= target_idx_end) or
+                [self.__yf[i] if (self.__yf[i] >= meaning_target_amplitude and target_idx_start <= i <= target_idx_end) or
                                  (target_idx_start >= i or i >= target_idx_end) else 0
                  for i in range(len(self.__yf))])
 

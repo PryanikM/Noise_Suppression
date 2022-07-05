@@ -9,6 +9,9 @@ from NoiseSuppression import NoiseSuppression
 
 import simpleaudio as sa
 import numpy as np
+from scipy.io.wavfile import write
+
+from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
 class Ui_Form(QMainWindow):
 
@@ -65,7 +68,10 @@ class Ui_Form(QMainWindow):
                 xf, yf = self.k.delete_noise(answer_range)
 
         else:
-            xf, yf = self.k.delete_noise()
+            if answer_amplitude != -1:
+                xf, yf = self.k.delete_noise(target_amplitude=answer_amplitude)
+            else:
+                xf, yf = self.k.delete_noise()
         self.delete_noise_widget.plot(xf, yf)
 
     def play_audio(self, audio, sample_rate):
@@ -149,9 +155,21 @@ class Ui_Form(QMainWindow):
         self.modify_audio_button.setObjectName("modify_audio_button")
         self.modify_audio_button.clicked.connect(self.play_clear_audio)
 
+        self.saveFileNameButton = QtWidgets.QPushButton(Form)
+        self.saveFileNameButton.setGeometry(QtCore.QRect(150, 340, 181, 51))
+        self.saveFileNameButton.clicked.connect(self.saveFile)
+
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
+    def saveFile(self):
+        sig = self.k.get_clear_audio()
+        if sig is not None:
+            filename, ok = QFileDialog.getSaveFileName(self,
+                                 "Сохранить файл",
+                                 ".",
+                                 "wav file(*.wav);; All Files(*.*)")
+            write(filename, self.k.get_sample_rate(), sig)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -164,6 +182,7 @@ class Ui_Form(QMainWindow):
 
         self.original_audio_button.setText(_translate("Form", "Послушать оригинал"))
         self.modify_audio_button.setText(_translate("Form", "Послушать очищенную версию"))
+        self.saveFileNameButton.setText(_translate("Form", "Сохранить"))
 
 
 if __name__ == "__main__":
